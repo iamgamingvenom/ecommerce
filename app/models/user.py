@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, Boolean DateTime, func
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -13,6 +13,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     phone = Column(String(30), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
+    is_admin = Column(Boolean, default=False, nullable=False)
 
     addresses = relationship("Address", back_populates="user", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="user")

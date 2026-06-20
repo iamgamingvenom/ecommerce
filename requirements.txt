@@ -6,9 +6,11 @@ cryptography==43.0.1
 pydantic==2.9.2
 pydantic-settings==2.5.2
 python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+passlib==1.7.4
+bcrypt==4.0.1
 python-multipart==0.0.9
 redis==5.0.8
 boto3==1.35.36
 requests==2.32.3
 alembic==1.13.3
+email-validator==2.2.0
