@@ -1,0 +1,33 @@
+{
+  "build": "h2df5915_12",
+  "build_number": 12,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64",
+  "constrains": [],
+  "depends": [
+    "vc14_runtime >=14.42.34433"
+  ],
+  "extracted_package_dir": "C:\\Users\\jehoo\\AppData\\Local\\anaconda3\\pkgs\\vc-14.3-h2df5915_12",
+  "files": [
+    ".nonadmin"
+  ],
+  "fn": "vc-14.3-h2df5915_12.conda",
+  "license": "BSD-3-Clause",
+  "link": {
+    "source": "C:\\Users\\jehoo\\AppData\\Local\\anaconda3\\pkgs\\vc-14.3-h2df5915_12",
+    "type": 1
+  },
+  "md5": "6737bfee92a331a876eadd8a2af7bc09",
+  "name": "vc",
+  "package_tarball_full_path": "C:\\Users\\jehoo\\AppData\\Local\\anaconda3\\pkgs\\vc-14.3-h2df5915_12.conda",
+  "paths_data": {
+    "paths": [],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "81f68bd3f7e74032547fc3c2b1d7d914b2688cc11f2470625c5c65d49d1474bd",
+  "size": 16822,
+  "subdir": "win-64",
+  "timestamp": 1779209283000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/vc-14.3-h2df5915_12.conda",
+  "version": "14.3"
+}

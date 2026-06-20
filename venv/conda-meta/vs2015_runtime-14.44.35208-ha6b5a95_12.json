@@ -1,0 +1,33 @@
+{
+  "build": "ha6b5a95_12",
+  "build_number": 12,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64",
+  "constrains": [],
+  "depends": [
+    "vc14_runtime >=14.44.35208"
+  ],
+  "extracted_package_dir": "C:\\Users\\jehoo\\AppData\\Local\\anaconda3\\pkgs\\vs2015_runtime-14.44.35208-ha6b5a95_12",
+  "files": [
+    ".nonadmin"
+  ],
+  "fn": "vs2015_runtime-14.44.35208-ha6b5a95_12.conda",
+  "license": "BSD-3-Clause",
+  "link": {
+    "source": "C:\\Users\\jehoo\\AppData\\Local\\anaconda3\\pkgs\\vs2015_runtime-14.44.35208-ha6b5a95_12",
+    "type": 1
+  },
+  "md5": "74783ea081af58781a57cf9ec9b09008",
+  "name": "vs2015_runtime",
+  "package_tarball_full_path": "C:\\Users\\jehoo\\AppData\\Local\\anaconda3\\pkgs\\vs2015_runtime-14.44.35208-ha6b5a95_12.conda",
+  "paths_data": {
+    "paths": [],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "5b484a4b7df0133f60fd9e12dcf1926f868eaa34a2c3ddad8475169a1a99d9fa",
+  "size": 16841,
+  "subdir": "win-64",
+  "timestamp": 1779209282000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/vs2015_runtime-14.44.35208-ha6b5a95_12.conda",
+  "version": "14.44.35208"
+}
