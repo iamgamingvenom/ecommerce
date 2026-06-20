@@ -8,6 +8,7 @@ __all__ = [
     "Token",
     "ProductOut",
     "ProductListItem",
+    "VariantOut",
     "CategoryCreate",
     "CategoryOut",
     "VariantCreate",

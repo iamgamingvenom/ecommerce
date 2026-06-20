@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 import os
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth_router, products_router, cart_router
 from sqlalchemy import text
 from app.database import engine
 from sqlalchemy.orm import Session
