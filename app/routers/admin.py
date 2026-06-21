@@ -10,6 +10,9 @@ from app.schemas import (
     VariantCreate, VariantUpdate, VariantOut,
 )
 
+from fastapi import UploadFile, File
+from app.core.s3 import upload_image_to_s3
+
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
@@ -133,3 +136,14 @@ def update_variant(
     db.commit()
     db.refresh(variant)
     return variant
+
+@router.post("/upload-image")
+def upload_image(
+    file: UploadFile = File(...),
+    _: User = Depends(get_current_admin_user),
+):
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    url = upload_image_to_s3(file.file, file.content_type, file.filename)
+    return {"url": url}
