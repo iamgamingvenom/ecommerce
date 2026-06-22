@@ -1,13 +1,13 @@
 import uuid
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.deps import get_current_user
 from app.database import get_db
 from app.models import Cart, CartItem, ProductVariant, User, Order, OrderItem, OrderStatus
 from app.schemas import OrderOut, OrderCreate, OrderInitializeOut, OrderVerifyPayload
-from app.core.paystack import initialize_paystack_transaction, verify_paystack_transaction
+from app.core.paystack import initialize_paystack_transaction, verify_paystack_transaction, verify_paystack_signature
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -115,6 +115,7 @@ def verify_order(
         db.query(Order)
         .options(joinedload(Order.items))
         .filter(Order.paystack_reference == payload.reference, Order.user_id == user.id)
+        .with_for_update()
         .first()
     )
     
@@ -157,6 +158,47 @@ def verify_order(
             status_code=400, 
             detail=f"Invalid transaction status or amount mismatch. Status: {tx_data.get('status')}"
         )
+
+
+@router.post("/webhook", status_code=200)
+async def paystack_webhook(request: Request, db: Session = Depends(get_db)):
+    signature = request.headers.get("x-paystack-signature")
+    if not signature:
+        raise HTTPException(status_code=400, detail="Missing signature")
+        
+    payload = await request.body()
+    if not verify_paystack_signature(payload, signature):
+        raise HTTPException(status_code=400, detail="Invalid signature")
+        
+    data = await request.json()
+    event = data.get("event")
+    
+    if event == "charge.success":
+        reference = data["data"]["reference"]
+        amount_minor = data["data"]["amount"]
+        
+        # Find order using with_for_update to prevent race conditions
+        order = (
+            db.query(Order)
+            .options(joinedload(Order.items))
+            .filter(Order.paystack_reference == reference)
+            .with_for_update()
+            .first()
+        )
+        
+        if order and order.status == OrderStatus.pending:
+            expected_amount_minor = int(order.total_amount * 100)
+            if amount_minor == expected_amount_minor:
+                # Deduct inventory stock for purchased variants
+                for item in order.items:
+                    variant = db.query(ProductVariant).filter(ProductVariant.id == item.variant_id).first()
+                    if variant and variant.stock_quantity >= item.quantity:
+                        variant.stock_quantity -= item.quantity
+                
+                order.status = OrderStatus.paid
+                db.commit()
+                
+    return {"status": "success"}
 
 
 @router.get("", response_model=list[OrderOut])

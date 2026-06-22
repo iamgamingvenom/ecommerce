@@ -1,7 +1,15 @@
 import requests
 from app.config import settings
 
+import hmac
+import hashlib
+
 PAYSTACK_API_URL = "https://api.paystack.co"
+
+def verify_paystack_signature(payload: bytes, signature: str) -> bool:
+    secret = settings.paystack_secret_key.encode('utf-8')
+    computed_hmac = hmac.new(secret, payload, hashlib.sha512).hexdigest()
+    return hmac.compare_digest(computed_hmac, signature)
 
 
 def initialize_paystack_transaction(email: str, amount_pesewas: int, reference: str) -> str:
