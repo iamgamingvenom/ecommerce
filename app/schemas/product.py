@@ -35,6 +35,9 @@ class ProductListItem(BaseModel):
     slug: str
     base_price: Decimal
     is_active: bool
+    category_id: int
+    category_name: str | None = None
+    image_url: str | None = None
 
     class Config:
         from_attributes = True
@@ -44,10 +47,16 @@ class CategoryCreate(BaseModel):
     slug: str
 
 
+class CategoryUpdate(BaseModel):
+    name: str | None = None
+    slug: str | None = None
+
+
 class CategoryOut(BaseModel):
     id: int
     name: str
     slug: str
+    is_active: bool
 
     class Config:
         from_attributes = True
@@ -63,6 +72,9 @@ class VariantCreate(BaseModel):
 
 
 class VariantUpdate(BaseModel):
+    size: str | None = None
+    color: str | None = None
+    sku: str | None = None
     price: Decimal | None = None
     stock_quantity: int | None = None
     image_url: str | None = None
@@ -78,6 +90,7 @@ class ProductCreate(BaseModel):
 
 class ProductUpdate(BaseModel):
     name: str | None = None
+    slug: str | None = None
     description: str | None = None
     base_price: Decimal | None = None
     is_active: bool | None = None

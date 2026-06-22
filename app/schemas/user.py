@@ -14,6 +14,7 @@ class UserOut(BaseModel):
     email: EmailStr
     phone: str | None = None
     is_admin: bool
+    is_active: bool
 
     class Config:
         from_attributes = True

@@ -4,6 +4,8 @@ from app.models.product import Category, Product
 from app.models.variant import ProductVariant
 from app.models.cart import Cart, CartItem
 from app.models.order import Order, OrderItem, OrderStatus
+from app.models.setting import SiteSetting
+from app.models.media import MediaAsset
 
 __all__ = [
     "User",
@@ -16,4 +18,6 @@ __all__ = [
     "Order",
     "OrderItem",
     "OrderStatus",
+    "SiteSetting",
+    "MediaAsset",
 ]

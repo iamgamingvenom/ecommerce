@@ -18,3 +18,17 @@ def upload_image_to_s3(file_obj, content_type: str, original_filename: str) -> s
     )
 
     return f"https://{settings.cloudfront_domain}/{key}"
+
+
+def delete_image_from_s3(s3_url: str):
+    try:
+        domain = settings.cloudfront_domain
+        prefix = f"https://{domain}/"
+        if s3_url.startswith(prefix):
+            key = s3_url[len(prefix):]
+            s3_client.delete_object(
+                Bucket=settings.s3_bucket_name,
+                Key=key,
+            )
+    except Exception as e:
+        print(f"Failed to delete {s3_url} from S3: {e}")

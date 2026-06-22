@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.deps import get_current_user
 from app.database import get_db
 from app.models import Cart, CartItem, ProductVariant, User
-from app.schemas import CartItemCreate, CartOut, CartItemOut
+from app.schemas import CartItemCreate, CartItemUpdate, CartOut, CartItemOut
 
 router = APIRouter(prefix="/cart", tags=["cart"])
 
@@ -33,21 +33,31 @@ def serialize_cart(cart: Cart) -> CartOut:
                 quantity=item.quantity,
                 unit_price=unit_price,
                 line_total=line_total,
+                product_id=item.variant.product.id,
+                product_name=item.variant.product.name,
+                product_slug=item.variant.product.slug,
+                size=item.variant.size,
+                color=item.variant.color,
+                image_url=item.variant.image_url,
             )
         )
     return CartOut(id=cart.id, items=items, subtotal=subtotal)
+
+
+def load_cart(db: Session, cart_id: int) -> Cart:
+    return (
+        db.query(Cart)
+        .options(joinedload(Cart.items).joinedload(CartItem.variant).joinedload(ProductVariant.product))
+        .filter(Cart.id == cart_id)
+        .first()
+    )
 
 
 @router.get("/", response_model=CartOut)
 def view_cart(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     cart = get_or_create_cart(db, user)
     db.refresh(cart)
-    cart = (
-        db.query(Cart)
-        .options(joinedload(Cart.items).joinedload(CartItem.variant))
-        .filter(Cart.id == cart.id)
-        .first()
-    )
+    cart = load_cart(db, cart.id)
     return serialize_cart(cart)
 
 
@@ -77,13 +87,39 @@ def add_item(
 
     db.commit()
 
-    cart = (
-        db.query(Cart)
-        .options(joinedload(Cart.items).joinedload(CartItem.variant))
-        .filter(Cart.id == cart.id)
-        .first()
-    )
+    cart = load_cart(db, cart.id)
     return serialize_cart(cart)
+
+
+@router.patch("/items/{item_id}", response_model=CartOut)
+def update_item_quantity(
+    item_id: int,
+    payload: CartItemUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    cart = get_or_create_cart(db, user)
+    item = db.query(CartItem).filter(CartItem.id == item_id, CartItem.cart_id == cart.id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Cart item not found")
+
+    if payload.quantity <= 0:
+        db.delete(item)
+        db.commit()
+        updated_cart = load_cart(db, cart.id)
+        return serialize_cart(updated_cart)
+
+    variant = db.query(ProductVariant).filter(ProductVariant.id == item.variant_id).first()
+    if not variant:
+        raise HTTPException(status_code=404, detail="Product variant not found")
+    if variant.stock_quantity < payload.quantity:
+        raise HTTPException(status_code=400, detail="Not enough stock")
+
+    item.quantity = payload.quantity
+    db.commit()
+
+    updated_cart = load_cart(db, cart.id)
+    return serialize_cart(updated_cart)
 
 
 @router.delete("/items/{item_id}", response_model=CartOut)
@@ -100,10 +136,5 @@ def remove_item(
     db.delete(item)
     db.commit()
 
-    cart = (
-        db.query(Cart)
-        .options(joinedload(Cart.items).joinedload(CartItem.variant))
-        .filter(Cart.id == cart.id)
-        .first()
-    )
-    return serialize_cart(cart)
+    updated_cart = load_cart(db, cart.id)
+    return serialize_cart(updated_cart)
