@@ -3,9 +3,9 @@ from app.config import settings
 
 redis_url = settings.redis_url
 if not redis_url.startswith("redis://") and not redis_url.startswith("rediss://"):
-    redis_url = f"redis://{redis_url}"
+    redis_url = f"rediss://{redis_url}"
 
-redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+redis_client = redis.Redis.from_url(redis_url, decode_responses=True, ssl_cert_reqs="none" if redis_url.startswith("rediss://") else None)
 
 def get_guest_cart(guest_id: str) -> dict:
     """Returns a dict of {variant_id (str): quantity (str)}"""
