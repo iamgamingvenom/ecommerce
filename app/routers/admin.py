@@ -73,13 +73,15 @@ def delete_category(
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     
-    category.is_active = False
-    
-    # Cascade soft delete to products
-    products = db.query(Product).filter(Product.category_id == category_id).all()
-    for product in products:
-        product.is_active = False
+    # Prevent deletion if products exist
+    products_count = db.query(Product).filter(Product.category_id == category_id).count()
+    if products_count > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete category because it contains products. Please delete or reassign the products first, or toggle the category to Inactive."
+        )
 
+    db.delete(category)
     db.commit()
     return None
 
@@ -142,7 +144,15 @@ def delete_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
         
-    product.is_active = False
+    for variant in product.variants:
+        if db.query(CartItem).filter(CartItem.variant_id == variant.id).first() or \
+           db.query(OrderItem).filter(OrderItem.variant_id == variant.id).first():
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot delete product because it has variants in a user's cart or order history. Please toggle it to Inactive instead."
+            )
+
+    db.delete(product)
     db.commit()
     return None
 

@@ -14,14 +14,17 @@ def list_public_categories(db: Session = Depends(get_db)):
 
 
 @router.get("/products/", response_model=list[ProductListItem])
-def list_products(category_id: int | None = None, db: Session = Depends(get_db)):
+def list_products(category_id: int | None = None, search: str | None = None, include_inactive: bool = False, db: Session = Depends(get_db)):
     query = (
         db.query(Product)
         .options(joinedload(Product.category), joinedload(Product.variants))
-        .filter(Product.is_active == True)
-    )  # noqa: E712
+    )
+    if not include_inactive:
+        query = query.filter(Product.is_active == True)  # noqa: E712
     if category_id:
         query = query.filter(Product.category_id == category_id)
+    if search:
+        query = query.filter(Product.name.ilike(f"%{search}%"))
 
     products = query.all()
     return [

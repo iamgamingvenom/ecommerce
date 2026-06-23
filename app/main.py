@@ -10,7 +10,15 @@ from app.routers import admin_router, products_router, cart_router, auth_router,
 from app.database import Base
 import app.models
 
-Base.metadata.create_all(bind=engine)
+from alembic.config import Config
+from alembic import command
+import logging
+
+try:
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+except Exception as e:
+    logging.error(f"Failed to run alembic migrations: {e}")
 
 app = FastAPI(title="Clothing Store API", version="0.1.0")
 
@@ -35,35 +43,6 @@ def health_check():
     return {"status": "ok"}
 
 
-
-@app.post("/admin/migrate-add-is-admin")
-def migrate_add_is_admin(secret: str):
-    if secret != os.environ.get("SECRET_KEY"):
-        raise HTTPException(status_code=403, detail="Forbidden")
-    with engine.connect() as conn:
-        conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT FALSE"))
-        conn.commit()
-    return {"status": "column added"}
-
-@app.post("/admin/migrate-add-is-active")
-def migrate_add_is_active(secret: str):
-    if secret != os.environ.get("SECRET_KEY"):
-        raise HTTPException(status_code=403, detail="Forbidden")
-    with engine.connect() as conn:
-        # Note: SQLite has limited ALTER TABLE support, but adding a column with a default works
-        conn.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE"))
-        conn.commit()
-    return {"status": "is_active column added"}
-
-@app.post("/admin/migrate-categories-is-active")
-def migrate_categories_is_active(secret: str):
-    if secret != os.environ.get("SECRET_KEY"):
-        raise HTTPException(status_code=403, detail="Forbidden")
-    with engine.connect() as conn:
-        conn.execute(text("ALTER TABLE categories ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE"))
-        conn.commit()
-    return {"status": "categories is_active column added"}
-
 @app.post("/admin/promote-to-admin")
 def promote_to_admin(email: str, secret: str, db: Session = Depends(get_db)):
     if secret != os.environ.get("SECRET_KEY"):
@@ -74,10 +53,3 @@ def promote_to_admin(email: str, secret: str, db: Session = Depends(get_db)):
     user.is_admin = True
     db.commit()
     return {"status": f"{email} is now admin"}
-
-@app.post("/admin/init-db")
-def init_db(secret: str):
-    if secret != os.environ.get("SECRET_KEY"):
-        raise HTTPException(status_code=403, detail="Forbidden")
-    Base.metadata.create_all(bind=engine)
-    return {"status": "tables created"}

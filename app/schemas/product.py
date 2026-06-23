@@ -50,6 +50,7 @@ class CategoryCreate(BaseModel):
 class CategoryUpdate(BaseModel):
     name: str | None = None
     slug: str | None = None
+    is_active: bool | None = None
 
 
 class CategoryOut(BaseModel):
