@@ -36,3 +36,6 @@ class OrderInitializeOut(BaseModel):
 
 class OrderVerifyPayload(BaseModel):
     reference: str
+
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus

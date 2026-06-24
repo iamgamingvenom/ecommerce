@@ -6,6 +6,8 @@ from app.models.cart import Cart, CartItem
 from app.models.order import Order, OrderItem, OrderStatus
 from app.models.setting import SiteSetting
 from app.models.media import MediaAsset
+from app.models.review import Review
+from app.models.wishlist import WishlistItem
 
 __all__ = [
     "User",
@@ -20,4 +22,6 @@ __all__ = [
     "OrderStatus",
     "SiteSetting",
     "MediaAsset",
+    "Review",
+    "WishlistItem",
 ]

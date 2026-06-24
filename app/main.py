@@ -6,7 +6,7 @@ from app.database import engine
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
-from app.routers import admin_router, products_router, cart_router, auth_router, settings_router, orders_router, addresses_router
+from app.routers import admin_router, products_router, cart_router, auth_router, settings_router, orders_router, addresses_router, reviews_router, wishlist_router
 from app.database import Base
 import app.models
 
@@ -24,7 +24,10 @@ app = FastAPI(title="Clothing Store API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten this to your Vercel frontend URL before going live
+    allow_origins=[
+        "https://ecommerce-frontend-beryl-chi.vercel.app",
+        "http://localhost:3000", 
+    ],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,8 +39,8 @@ app.include_router(cart_router)
 app.include_router(settings_router)
 app.include_router(orders_router)
 app.include_router(addresses_router)
-
-
+app.include_router(reviews_router)
+app.include_router(wishlist_router)
 @app.get("/health")
 def health_check():
     return {"status": "ok"}

@@ -11,7 +11,7 @@ from app.schemas import (
     MediaAssetOut,
 )
 from app.schemas.user import UserOut
-from app.schemas.order import OrderOut
+from app.schemas.order import OrderOut, OrderStatusUpdate
 from app.core.s3 import upload_image_to_s3, delete_image_from_s3
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -328,3 +328,26 @@ def list_user_orders(
     
     orders = db.query(Order).filter(Order.user_id == user_id).all()
     return orders
+
+@router.get("/orders", response_model=list[OrderOut])
+def list_all_orders(
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_admin_user),
+):
+    return db.query(Order).order_by(Order.created_at.desc()).all()
+
+@router.patch("/orders/{order_id}/status", response_model=OrderOut)
+def update_order_status(
+    order_id: int,
+    payload: OrderStatusUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_admin_user),
+):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    order.status = payload.status
+    db.commit()
+    db.refresh(order)
+    return order
